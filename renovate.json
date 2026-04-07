@@ -4,7 +4,7 @@
     "config:recommended"
   ],
   "dependencyDashboard": true,
-  "minimumReleaseAge": "2",
+  "minimumReleaseAge": "3 days",
   "prConcurrentLimit": 3,
   "rebaseWhen": "behind-base-branch",
   "packageRules": [
