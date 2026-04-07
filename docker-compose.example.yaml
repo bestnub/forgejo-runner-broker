@@ -1,0 +1,14 @@
+services:
+  # Runner Broker
+  runner-broker:
+    image: bestnub/forgejo-runner-broker:latest
+    container_name: forgejo-runner-broker
+    restart: unless-stopped
+    ports:
+      - "3090:80"
+    environment: # See .env.example for details
+      NITRO_FORGEJO_BASE_URL: http://forgejo:3000
+      NITRO_PREFERRED_RUNNER_UUIDS: abcdefe8-14bc-4336-add9-13c3d4fecc6b
+      NITRO_FALLBACK_RUNNER_UUIDS: fedcbac7-3211-4e95-abed-f8d2c2ec784e
+      NITRO_PREFERRED_RUNNER_TTL_SECONDS: 15
+      NITRO_BLOCK_UNASSIGNED_RUNNERS: false

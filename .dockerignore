@@ -9,6 +9,7 @@ node_modules
 .idea
 .env.example
 docker-compose.example.yaml
+docs
 dist
 coverage
 npm-debug.log*
