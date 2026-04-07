@@ -1,0 +1,94 @@
+name: Build and Push Release Image
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  docker:
+    runs-on: docker
+    container:
+      image: node:24-alpine
+
+    steps:
+      - name: Install tools
+        shell: sh
+        run: |
+          set -eu
+          apk add --no-cache git docker-cli docker-cli-buildx
+
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Prepare tags
+        shell: sh
+        env:
+          RELEASE_TAG: ${{ forgejo.event.release.tag_name }}
+        run: |
+          set -eu
+
+          TAG="$RELEASE_TAG"
+
+          case "$TAG" in
+            v[0-9]*.[0-9]*.[0-9]*) ;;
+            *)
+              echo "Release tag must look like v1.2.3, got: $TAG"
+              exit 1
+              ;;
+          esac
+
+          VERSION="${TAG#v}"
+          MAJOR="${VERSION%%.*}"
+          REST="${VERSION#*.}"
+          MINOR="${REST%%.*}"
+
+          {
+            echo "FORGEJO_IMAGE=git.bestnub.de/bestnub/forgejo-runner-broker"
+            echo "DOCKERHUB_IMAGE=bestnub/forgejo-runner-broker"
+            echo "TAG=$TAG"
+            echo "MINOR_TAG=v$MAJOR.$MINOR"
+            echo "MAJOR_TAG=v$MAJOR"
+          } >> "$FORGEJO_ENV"
+
+      - name: Docker info
+        shell: sh
+        run: |
+          docker version
+          docker info
+
+      - name: Log in to Forgejo registry
+        shell: sh
+        run: |
+          echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login git.bestnub.de \
+            --username "${{ secrets.REGISTRY_USERNAME }}" \
+            --password-stdin
+
+      - name: Log in to Docker Hub
+        shell: sh
+        run: |
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login \
+            --username "${{ secrets.DOCKERHUB_USERNAME }}" \
+            --password-stdin
+
+      - name: Create buildx builder
+        shell: sh
+        run: |
+          docker buildx create --use --name ci-builder || docker buildx use ci-builder
+          docker buildx inspect --bootstrap
+
+      - name: Build and push
+        shell: sh
+        run: |
+          docker buildx build \
+            --pull \
+            --push \
+            -f Dockerfile \
+            -t "$FORGEJO_IMAGE:$TAG" \
+            -t "$FORGEJO_IMAGE:$MINOR_TAG" \
+            -t "$FORGEJO_IMAGE:$MAJOR_TAG" \
+            -t "$FORGEJO_IMAGE:latest" \
+            -t "$DOCKERHUB_IMAGE:$TAG" \
+            -t "$DOCKERHUB_IMAGE:$MINOR_TAG" \
+            -t "$DOCKERHUB_IMAGE:$MAJOR_TAG" \
+            -t "$DOCKERHUB_IMAGE:latest" \
+            .

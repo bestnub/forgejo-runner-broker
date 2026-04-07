@@ -8,7 +8,7 @@ node_modules
 .vscode
 .idea
 .env.example
-docker-compose.yaml
+docker-compose.example.yaml
 dist
 coverage
 npm-debug.log*
