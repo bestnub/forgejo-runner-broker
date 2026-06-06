@@ -10,10 +10,10 @@ importers:
     devDependencies:
       jiti:
         specifier: ^2.6.1
-        version: 2.6.1
+        version: 2.7.0
       nitro:
         specifier: ^3.0.260311-beta
-        version: 3.0.260311-beta(jiti@2.6.1)
+        version: 3.0.260311-beta(jiti@2.7.0)
 
 packages:
 
@@ -202,8 +202,8 @@ packages:
   httpxy@0.5.0:
     resolution: {integrity: sha512-qwX7QX/rK2visT10/b7bSeZWQOMlSm3svTD0pZpU+vJjNUP0YHtNv4c3z+MO+MSnGuRFWJFdCZiV+7F7dXIOzg==}
 
-  jiti@2.6.1:
-    resolution: {integrity: sha512-ekilCSN1jwRvIbgeg/57YFh8qQDNbwDb9xT/qu2DAHbFFZUicIl4ygVaAvzveMhMVr3LnpSKTNnwt8PoOfmKhQ==}
+  jiti@2.7.0:
+    resolution: {integrity: sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ==}
     hasBin: true
 
   nf3@0.3.16:
@@ -453,11 +453,11 @@ snapshots:
 
   httpxy@0.5.0: {}
 
-  jiti@2.6.1: {}
+  jiti@2.7.0: {}
 
   nf3@0.3.16: {}
 
-  nitro@3.0.260311-beta(jiti@2.6.1):
+  nitro@3.0.260311-beta(jiti@2.7.0):
     dependencies:
       consola: 3.4.2
       crossws: 0.4.4(srvx@0.11.15)
@@ -474,7 +474,7 @@ snapshots:
       unenv: 2.0.0-rc.24
       unstorage: 2.0.0-alpha.7(db0@0.3.4)(ofetch@2.0.0-alpha.3)
     optionalDependencies:
-      jiti: 2.6.1
+      jiti: 2.7.0
     transitivePeerDependencies:
       - '@azure/app-configuration'
       - '@azure/cosmos'
