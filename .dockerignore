@@ -7,6 +7,8 @@ node_modules
 .pre-commit-config.yaml
 .vscode
 .idea
+.env
+.env.local
 .env.example
 docker-compose.example.yaml
 docs

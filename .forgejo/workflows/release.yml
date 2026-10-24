@@ -8,7 +8,7 @@ jobs:
   docker:
     runs-on: docker
     container:
-      image: node:24-alpine
+      image: node:24.21.0-alpine
 
     steps:
       - name: Install tools
@@ -19,11 +19,14 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          ref: ${{ forgejo.event.release.tag_name }}
 
       - name: Prepare tags
         shell: sh
         env:
           RELEASE_TAG: ${{ forgejo.event.release.tag_name }}
+          RELEASE_PRERELEASE: ${{ forgejo.event.release.prerelease }}
         run: |
           set -eu
 
@@ -42,12 +45,18 @@ jobs:
           REST="${VERSION#*.}"
           MINOR="${REST%%.*}"
 
+          IS_PRERELEASE=false
+          if [ "$RELEASE_PRERELEASE" = "true" ]; then
+            IS_PRERELEASE=true
+          fi
+
           {
             echo "FORGEJO_IMAGE=git.bestnub.de/bestnub/forgejo-runner-broker"
             echo "DOCKERHUB_IMAGE=bestnub/forgejo-runner-broker"
             echo "TAG=$TAG"
             echo "MINOR_TAG=v$MAJOR.$MINOR"
             echo "MAJOR_TAG=v$MAJOR"
+            echo "IS_PRERELEASE=$IS_PRERELEASE"
           } >> "$FORGEJO_ENV"
 
       - name: Docker info
@@ -79,16 +88,26 @@ jobs:
       - name: Build and push
         shell: sh
         run: |
+          set -eu
+
+          set -- \
+            -t "$FORGEJO_IMAGE:$TAG" \
+            -t "$DOCKERHUB_IMAGE:$TAG"
+
+          if [ "${IS_PRERELEASE:-false}" != "true" ]; then
+            set -- "$@" \
+              -t "$FORGEJO_IMAGE:$MINOR_TAG" \
+              -t "$FORGEJO_IMAGE:$MAJOR_TAG" \
+              -t "$FORGEJO_IMAGE:latest" \
+              -t "$DOCKERHUB_IMAGE:$MINOR_TAG" \
+              -t "$DOCKERHUB_IMAGE:$MAJOR_TAG" \
+              -t "$DOCKERHUB_IMAGE:latest"
+          fi
+
           docker buildx build \
             --pull \
             --push \
+            --platform linux/amd64 \
             -f Dockerfile \
-            -t "$FORGEJO_IMAGE:$TAG" \
-            -t "$FORGEJO_IMAGE:$MINOR_TAG" \
-            -t "$FORGEJO_IMAGE:$MAJOR_TAG" \
-            -t "$FORGEJO_IMAGE:latest" \
-            -t "$DOCKERHUB_IMAGE:$TAG" \
-            -t "$DOCKERHUB_IMAGE:$MINOR_TAG" \
-            -t "$DOCKERHUB_IMAGE:$MAJOR_TAG" \
-            -t "$DOCKERHUB_IMAGE:latest" \
+            "$@" \
             .
