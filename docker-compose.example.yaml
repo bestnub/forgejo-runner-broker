@@ -4,6 +4,7 @@ services:
     image: bestnub/forgejo-runner-broker:latest
     container_name: forgejo-runner-broker
     restart: unless-stopped
+    mem_limit: 64m
     ports:
       - "3090:80"
     environment: # See .env.example for details
